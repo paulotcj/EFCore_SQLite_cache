@@ -1,14 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SQLite_entity_core.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 namespace SQLite_entity_core
 {
     public class Startup
@@ -23,7 +25,16 @@ namespace SQLite_entity_core
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            var connection = new SqliteConnection(@"Data Source=.//SQLiteDB.db");
+            //connection.Open();
+
             services.AddControllersWithViews();
+
+            services.AddDbContext<SQLiteContext>(options =>
+            {
+                options.UseSqlite(connection);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

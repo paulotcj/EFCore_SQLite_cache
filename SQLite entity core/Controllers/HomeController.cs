@@ -15,22 +15,17 @@ namespace SQLite_entity_core.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly SQLiteContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, SQLiteContext context)
         {
+            _context = context;
             _logger = logger;
         }
 
         public IActionResult Index()
         {
-            //var user = new User();
-            //user.Name = "John"; user.UserName = "johndoe"; user.Email = "johndoe@none.com";
 
-            //using ( var db = new SQLiteContext())
-            //{
-            //    db.Add(user);
-            //    db.SaveChanges();
-            //}
 
             var strDate = DateTime.Now;
 
@@ -48,25 +43,23 @@ namespace SQLite_entity_core.Controllers
             var userCache = new UserCache();
             userCache.JSON = JsonSerializer.Serialize(listUser);
 
-            using (var db = new SQLiteContext())
-            {
-                var remove = db.UserCache.Where(x => x.Creation < DateTime.Now.AddMinutes(-5) ).ToList();
-                db.UserCache.RemoveRange(remove);
-                db.SaveChanges();
+            //_context.Database.EnsureCreated();
+            //_context.SaveChanges();
 
 
-                db.Add(userCache);
-                db.SaveChanges();
-            }
+            var remove = _context.UserCache.Where(x => x.Creation < DateTime.Now.AddMinutes(-5)).ToList();
+            _context.UserCache.RemoveRange(remove);
+            _context.SaveChanges();
+
+            _context.Add(userCache);
+            _context.SaveChanges();
+
 
             List<User> listUserDeserialize;
 
-            using (var db = new SQLiteContext())
-            {
-                var userCache2 = db.UserCache.OrderByDescending(x => x.Creation).FirstOrDefault();
-                listUserDeserialize = JsonSerializer.Deserialize<List<User>>(userCache.JSON);
+            var userCache2 = _context.UserCache.OrderByDescending(x => x.Creation).FirstOrDefault();
+            listUserDeserialize = JsonSerializer.Deserialize<List<User>>(userCache.JSON);
 
-            }
 
 
 
